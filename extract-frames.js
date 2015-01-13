@@ -2,6 +2,7 @@
 
 var fs = require('fs'),
 	path = require('path'),
+	util = require('util'),
 	async = require("async"),
 	gm = require("gm"),
 	pkg = require(path.join(__dirname, 'package.json')),
@@ -60,7 +61,7 @@ if (!fs.existsSync(outDir)) {
 }
 
 var outDir = path.basename(outDir);
-var fileList = [], fileCount = 0;
+var sceneList = [], fileList = [], fileCount = 0;
 
 var getTimeString = function(input) {
 
@@ -72,61 +73,54 @@ var buildFileName = function(dir, index, frame) {
 	return dir + "/scene-" + index + "-keyframe-" + frame + "-frame-%003d.jpg";
 }
 
-var execExtractCmd = function(time, input, count, name, cb) {
+data.forEach(function(scene, index) {
 
-	child_process.exec(
+	index++;
 
-		"ffmpeg -ss " + getTimeString(time) + " -i " + input + " -frames:v " + (count * 2 + 1) + " " + name,
+	sceneList.push({
 		
-		function(err) {
+		id: scene.id,
+		index: index,
+		frame: scene.startFrame
+	});
 
-			cb(err);
-		}
-	);
-}
+	sceneList.push({
+		
+		id: scene.id,
+		index: index,
+		frame: scene.endFrame
+	});
+});
+
+console.log("Starting the process...");
 
 async.series([
 
 	// Extract the frames
 	function(cb) {
 
-		async.each(
+		async.eachLimit(
 
-			data,
+			sceneList,
+			8,
 			function(scene, callback) {
 
-				var time, outName;
+				var time = (scene.frame - frameCount) / fps;
+				var outName = buildFileName(outDir, scene.index, scene.frame);
 
-				async.parallel([
+				child_process.exec(
 
-					function(parCb) {
+					"ffmpeg -ss " + getTimeString(time) + " -i " + argv.i + " -frames:v " + (frameCount * 2 + 1) + " " + outName, 
+					function(err) {
 
-						time = (scene.startFrame - frameCount) / fps;
-						outName = buildFileName(outDir, scene.sceneNumber, scene.startFrame);
+						if (err) { 
+							console.log(err); 
+						}
 
-						execExtractCmd(time, argv.i, frameCount, outName, function(err) {
-
-							fileCount++;
-							parCb(err);
-						});					
-					},
-
-					function(parCb) {
-
-						time = (scene.endFrame - frameCount) / fps;
-						outName = buildFileName(outDir, scene.sceneNumber, scene.endFrame);
-
-						execExtractCmd(time, argv.i, frameCount, outName, function(err) {
-							
-							fileCount++;
-							parCb(err);
-						});					
-					},
-				],
-
-				function() {
-					callback();
-				});
+						fileCount++;
+						callback(err);
+					}
+				);
 			},
 
 			function(err) {
@@ -142,7 +136,70 @@ async.series([
 
 		fs.readdir(outDir, function(err, files) {
 
-			console.log(fileList.length);
+			if (err) {
+
+				console.error("Something went wrong.");
+				console.log(err);
+			
+			} else {
+
+				fileList = files;
+			}
+
+			cb(err);
 		});
+	},
+
+	// Process all the images with node-gm
+	function(cb) {
+
+		console.log("Total images extracted: %d", fileList.length);
+		console.log("Getting ready to process and resize %d images...", fileList.length);
+
+		async.eachLimit(
+
+			fileList,
+			8,
+			function(file, callback) {
+
+				var fullPath = path.join(outDir, file);
+
+				gm(fullPath)
+					.resize(240)
+					.noProfile()
+					.write(fullPath, function(err) {
+
+						if (err) {
+
+							console.error("Something went wrong while processing the image.");
+							console.log(err);
+						}
+
+						callback();
+					});
+			},
+
+			function(err) {
+
+				if (!err) {
+
+					console.log("Resized all the images in ./frames/ directory.");
+				}
+
+				cb(err);
+			}
+		);
+	}
+
+	// Push images to AWS S3
+	function(cb) {
+
+
+	},
+
+	// Delete the local images
+	function(cb) {
+
+		
 	}
 ]);
