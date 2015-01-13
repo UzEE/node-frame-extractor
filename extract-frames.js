@@ -38,7 +38,7 @@ if (!fs.existsSync(argv.data)) {
 var data;
 
 try {
-	data = require(path.join(__dirname, argv.data));
+	data = require(path.join(process.cwd(), argv.data));
 }
 
 catch (exp) {
@@ -60,6 +60,7 @@ if (!fs.existsSync(outDir)) {
 }
 
 var outDir = path.basename(outDir);
+var fileList = [], fileCount = 0;
 
 var getTimeString = function(input) {
 
@@ -67,33 +68,81 @@ var getTimeString = function(input) {
 	return result.getUTCHours() + ":" + result.getUTCMinutes() + ":" + result.getUTCSeconds() + "." + result.getUTCMilliseconds(); 
 }
 
-async.series([
+var buildFileName = function(dir, index, frame) {
+	return dir + "/scene-" + index + "-keyframe-" + frame + "-frame-%003d.jpg";
+}
 
-	var execCount = 0;
+var execExtractCmd = function(time, input, count, name, cb) {
 
-	async.each(
+	child_process.exec(
 
-		data,
-		function(scene, callback) {
-
-			var time = (scene.startFrame - frameCount) / fps;
-			var outName =  outDir + "/scene-" + execCount + "-keyframe-" + scene.startFrame + "-frame-";
-
-			child_process.exec("ffmpeg -ss " + getTimeString(time) + " -i " + argv.i + " -frames:v " + (frameCount * 2 + 1) + " " + outName + "%02d.jpg");
-
-			time = (scene.endFrame - frameCount) / fps;
-			outName = outDir + "/scene-" + execCount + "-keyframe-" + scene.endFrame + "-frame-";
-
-			child_process.exec("ffmpeg -ss " + getTimeString(time) + " -i " + argv.i + "-frames:v " + (frameCount * 2 + 1) + " " + outName + "%02d.jpg");
-
-			execCount++;
-
-			callback();
-		},
-
+		"ffmpeg -ss " + getTimeString(time) + " -i " + input + " -frames:v " + (count * 2 + 1) + " " + name,
+		
 		function(err) {
-			
-			console.info("All scenes have been dumped in the ./frames/ directory.");
+
+			cb(err);
 		}
 	);
+}
+
+async.series([
+
+	// Extract the frames
+	function(cb) {
+
+		async.each(
+
+			data,
+			function(scene, callback) {
+
+				var time, outName;
+
+				async.parallel([
+
+					function(parCb) {
+
+						time = (scene.startFrame - frameCount) / fps;
+						outName = buildFileName(outDir, scene.sceneNumber, scene.startFrame);
+
+						execExtractCmd(time, argv.i, frameCount, outName, function(err) {
+
+							fileCount++;
+							parCb(err);
+						});					
+					},
+
+					function(parCb) {
+
+						time = (scene.endFrame - frameCount) / fps;
+						outName = buildFileName(outDir, scene.sceneNumber, scene.endFrame);
+
+						execExtractCmd(time, argv.i, frameCount, outName, function(err) {
+							
+							fileCount++;
+							parCb(err);
+						});					
+					},
+				],
+
+				function() {
+					callback();
+				});
+			},
+
+			function(err) {
+
+				console.info("All scenes have been dumped in the ./frames/ directory.");
+				cb(err, true);
+			}
+		);
+	},
+
+	// Build a list of all files to process
+	function(cb) {
+
+		fs.readdir(outDir, function(err, files) {
+
+			console.log(fileList.length);
+		});
+	}
 ]);
