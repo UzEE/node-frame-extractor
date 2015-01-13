@@ -1,0 +1,22 @@
+{
+  "name": "ingrain-frame-ext",
+  "version": "0.0.1",
+  "description": "A simple tool to extract, resize and upload frames from the given video.",
+  "main": "extract.js",
+  "dependencies": {
+    "async": "^0.9.0",
+    "gm": "^1.17.0",
+    "yargs": "^1.3.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ingrain",
+    "video",
+    "ffmpeg"
+  ],
+  "author": "Uzair Sajid",
+  "license": "MIT"
+}
