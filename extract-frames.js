@@ -1,8 +1,11 @@
 var fs = require('fs'),
 	path = require('path'),
+	async = require("async"),
+	gm = require("gm"),
+	pkg = require(path.join(__dirname, 'package.json')),
 	child_process = require('child_process'),
 	argv = require('yargs')
-		.version('0.0.1')
+		.version(pkg.name + ", version: " + pkg.version + "\n", "version")
 		.usage("Extracts adjecent frames from each scene in the given input video, and saves them in a new sub-directory called 'frames'.\nUsage: $0 -i [video] --fps [num] --frame-count [num] --data [scenes.json]")
 		.example('$0 -i ./1.mp4 --data ./scenes.json', "Dump adjecent frames of all scenes in the file asuming a default framerate of 23.976")
 		.demand(['i', 'd'])
@@ -33,7 +36,7 @@ if (!fs.existsSync(argv.data)) {
 var data;
 
 try {
-	data = require(argv.data);
+	data = require(path.join(__dirname, argv.data));
 }
 
 catch (exp) {
