@@ -77,7 +77,7 @@ if (!fs.existsSync(outDir)) {
 }
 
 var outDir = path.basename(outDir),
-	sceneList = [], 
+	failedFrames = [], 
 	fileList = [], 
 	fileCount = 0
 	pushCount = 0,
@@ -101,27 +101,8 @@ var getTimeString = function (input) {
 }
 
 var buildFileName = function (dir, frame) {
-	return dir + "/frame.keyframe." + frame + ".frame.%003d.jpg";
+	return dir + "/frame.keyframe." + frame + ".%003d.jpg";
 }
-
-data.scenes.forEach(function (scene, index) {
-
-	index++;
-
-	sceneList.push({
-		
-		id: scene.id,
-		index: index,
-		frame: scene.startFrame
-	});
-
-	sceneList.push({
-		
-		id: scene.id,
-		index: index,
-		frame: scene.endFrame
-	});
-});
 
 console.log("Starting the process...");
 
@@ -132,12 +113,12 @@ async.series([
 
 		async.eachLimit(
 
-			sceneList,
-			concurrency == 0 ? sceneList.length * 2 : concurrency,
-			function (scene, callback) {
+			data.frames,
+			concurrency == 0 ? data.frames.length * 2 : concurrency,
+			function (frame, callback) {
 
-				var time = (scene.frame - frameCount) / fps;
-				var outName = buildFileName(outDir, scene.frame);
+				var time = (frame - frameCount) / fps;
+				var outName = buildFileName(outDir, frame);
 
 				child_process.exec(
 
@@ -210,6 +191,17 @@ async.series([
 						}
 
 						if (pushToCloud) {
+
+							var nameArray = file.split('.');
+							var keyframe = parseInt(nameArray[2]);
+							var frameOffset = parseInt(nameArray[3]);
+
+							var frameNumber = keyframe + frameOffset - (frameCount + 1);
+
+							nameArray.splice(2, 1);
+							nameArray[2] = frameNumber;
+
+							file = nameArray.join('.');
 
 							var params = {
 								
