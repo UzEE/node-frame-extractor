@@ -8,6 +8,10 @@
   "bin": {
     "extract-frames": "extract-frames.js"
   },
+  "scripts": {
+    "postinstall": "npm link",
+    "preuninstall": "npm unlink"
+  },
   "repository": {
     "type": "git",
     "url": "ssh://git@54.68.168.242:~/ingrain-frame-ext.git"
