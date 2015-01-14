@@ -26,6 +26,7 @@ var fs = require('fs'),
 		.default('t', 8)
 		.default('b', "ingrain.scenes.frames")
 		.default('p', false)
+		.default('aws-profile', "default")
 		.describe('i', 'Input video filename.')
 		.describe('d', 'Scene data in Json format with a scene object having startFrame and endFrame keys.')
 		.describe('f', 'Framerate of the input video. Must be accurate to extract scenes properly.')
@@ -33,6 +34,7 @@ var fs = require('fs'),
 		.describe('t', 'Number of concurrent sub-processes to use simultaneously. Should be used to tweak resource consumption. Use a value of 0 to run all sub-processes at once.')
 		.describe('b', 'S3 Bucket to which the extracted frames will be pushed to.')
 		.describe('p', 'Determines whether the extracted images be pushed to a cloud storage or not.')
+		.describe('aws-profile', "Name of the AWS Credentials profile to use from the ~/.aws/credentials file.")
 		.argv;
 
 if (!fs.existsSync(argv.i)) {
@@ -82,7 +84,13 @@ var outDir = path.basename(outDir),
 	totalPushCount = 0,
 	videoId = data.videoId;
 
-AWS.config.update({region: "us-west-2"});
+var credentials = new AWS.SharedIniFileCredentials({profile: argv.awsProfile});
+
+AWS.config.update({
+
+	credentials: credentials,
+	region: "us-west-2"
+});
 
 var s3 = new AWS.S3();
 
