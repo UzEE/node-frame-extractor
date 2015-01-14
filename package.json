@@ -1,11 +1,16 @@
 {
   "name": "ingrain-frame-ext",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "A simple tool to extract, resize and upload frames from the given video.",
   "main": "extract-frames.js",
   "preferGlobal": "true",
+  "readme": "README.md",
   "bin": {
     "extract-frames": "extract-frames.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@54.68.168.242:~/ingrain-frame-ext.git"
   },
   "dependencies": {
     "async": "^0.9.0",

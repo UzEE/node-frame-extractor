@@ -92,8 +92,8 @@ var getTimeString = function (input) {
 	return result.getUTCHours() + ":" + result.getUTCMinutes() + ":" + result.getUTCSeconds() + "." + result.getUTCMilliseconds(); 
 }
 
-var buildFileName = function (dir, index, frame) {
-	return dir + "/scene." + index + ".keyframe." + frame + ".frame.%003d.jpg";
+var buildFileName = function (dir, frame) {
+	return dir + "/frame.keyframe." + frame + ".frame.%003d.jpg";
 }
 
 data.scenes.forEach(function (scene, index) {
@@ -129,7 +129,7 @@ async.series([
 			function (scene, callback) {
 
 				var time = (scene.frame - frameCount) / fps;
-				var outName = buildFileName(outDir, scene.index, scene.frame);
+				var outName = buildFileName(outDir, scene.frame);
 
 				child_process.exec(
 
