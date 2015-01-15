@@ -198,8 +198,8 @@ async.series([
 
 							var frameNumber = keyframe + frameOffset - (frameCount + 1);
 
-							nameArray.splice(2, 1);
-							nameArray[2] = frameNumber;
+							nameArray.splice(1, 2);
+							nameArray[1] = frameNumber;
 
 							file = nameArray.join('.');
 
