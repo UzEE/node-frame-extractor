@@ -16,24 +16,30 @@ var fs = require('fs'),
 		.demand(['i', 'd'])
 		.alias('i', 'input')
 		.alias('d', 'data')
-		.alias('f', 'fps')
+		.alias('r', 'fps')
 		.alias('c', 'frame-count')
 		.alias('t', 'concurrency')
 		.alias('b', 'bucket')
 		.alias('p', 'push-to-cloud')
-		.default('f', 23.976)
+		.alias('a', 'extract-all-frames')
+		.alias('f', 'total-frames')
+		.default('r', 23.976)
 		.default('c', 5)
 		.default('t', 8)
 		.default('b', "ingrain.scenes.frames")
 		.default('p', false)
+		.default('a', false)
+		.default('f', null)
 		.default('aws-profile', "default")
 		.describe('i', 'Input video filename.')
 		.describe('d', 'Scene data in Json format with a scene object having startFrame and endFrame keys.')
-		.describe('f', 'Framerate of the input video. Must be accurate to extract scenes properly.')
+		.describe('r', 'Framerate of the input video. Must be accurate to extract scenes properly.')
 		.describe('c', 'Number of frames to extract on either side of the scene. This is in addition to the frame marked in the scene boundry.')
 		.describe('t', 'Number of concurrent sub-processes to use simultaneously. Should be used to tweak resource consumption. Use a value of 0 to run all sub-processes at once.')
 		.describe('b', 'S3 Bucket to which the extracted frames will be pushed to.')
 		.describe('p', 'Determines whether the extracted images be pushed to a cloud storage or not.')
+		.describe('a', 'Extract all frames of the video. Requires --fps and --total-frames.')
+		.describe('f', 'Total number of frames to extract fromt he video.')
 		.describe('aws-profile', "Name of the AWS Credentials profile to use from the ~/.aws/credentials file.")
 		.argv;
 
@@ -65,7 +71,9 @@ var fps = Math.abs(argv.fps),
 	frameCount = Math.abs(argv.frameCount),
 	s3Bucket = argv.bucket,
 	pushToCloud = argv.pushToCloud,
-	concurrency = argv.concurrency;
+	concurrency = argv.concurrency,
+	totalFrames = argv.totalFrames,
+	extractAllFrames = argv.extractAllFrames;
 
 var inputExt = path.extname(argv.i),
 	inputName = path.basename(argv.i, inputExt);
@@ -82,7 +90,8 @@ var outDir = path.basename(outDir),
 	fileCount = 0
 	pushCount = 0,
 	totalPushCount = 0,
-	videoId = data.videoId;
+	videoId = data.videoId,
+	ffmpegCmd = null;
 
 var credentials = new AWS.SharedIniFileCredentials({profile: argv.awsProfile});
 
@@ -104,6 +113,10 @@ var buildFileName = function (dir, frame) {
 	return dir + "/frame.keyframe." + frame + ".%003d.jpg";
 }
 
+if (extractAllFrames && totalFrames) {
+	ffmpegCmd = "ffmpeg -ss 00:00:00 -i " + argv.i + " -r " + fps + " -vframes " + totalFrames + " " + outDir + "/frame.%0" + totalFrames.toString().length + "d.jpg";
+}
+
 console.log("Starting the process...");
 
 async.series([
@@ -111,36 +124,61 @@ async.series([
 	// Extract the frames
 	function (cb) {
 
-		async.eachLimit(
+		if (!extractAllFrames) {
 
-			data.frames,
-			concurrency == 0 ? data.frames.length * 2 : concurrency,
-			function (frame, callback) {
+			async.eachLimit(
 
-				var time = (frame - frameCount) / fps;
-				var outName = buildFileName(outDir, frame);
+				data.frames,
+				concurrency == 0 ? data.frames.length * 2 : concurrency,
+				function (frame, callback) {
 
-				child_process.exec(
+					var time = (frame - frameCount) / fps;
+					var outName = buildFileName(outDir, frame);
 
-					"ffmpeg -ss " + getTimeString(time) + " -i " + argv.i + " -frames:v " + (frameCount * 2 + 1) + " " + outName, 
-					function (err) {
+					ffmpegCmd = "ffmpeg -ss " + getTimeString(time) + " -i " + argv.i + " -frames:v " + (frameCount * 2 + 1) + " " + outName;
 
-						if (err) { 
-							console.log(err); 
+					child_process.exec(
+
+						ffmpegCmd, 
+						function (err) {
+
+							if (err) { 
+								console.log(err); 
+							}
+
+							fileCount++;
+							callback(err);
 						}
+					);
+				},
 
-						fileCount++;
-						callback(err);
+				function (err) {
+
+					console.info("All scenes have been dumped in the ./frames/ directory.");
+					cb(err, true);
+				}
+			);
+
+		} else {
+
+			child_process.exec(
+
+				ffmpegCmd, 
+				function (err) {
+
+					if (err) { 
+
+						console.log(err); 
+						cb(err, false);
+
+					} else {
+
+						console.info("All scenes have been dumped in the ./frames/ directory.");
+						cb(null, true);
 					}
-				);
-			},
-
-			function (err) {
-
-				console.info("All scenes have been dumped in the ./frames/ directory.");
-				cb(err, true);
-			}
-		);
+				}
+			);
+		}
 	},
 
 	// Build a list of all files to process
@@ -193,13 +231,21 @@ async.series([
 						if (pushToCloud) {
 
 							var nameArray = file.split('.');
-							var keyframe = parseInt(nameArray[2]);
-							var frameOffset = parseInt(nameArray[3]);
 
-							var frameNumber = keyframe + frameOffset - (frameCount + 1);
+							if (!extractAllFrames) {
 
-							nameArray.splice(1, 2);
-							nameArray[1] = frameNumber;
+								var keyframe = parseInt(nameArray[2]);
+								var frameOffset = parseInt(nameArray[3]);
+
+								var frameNumber = keyframe + frameOffset - (frameCount + 1);
+
+								nameArray.splice(1, 2);
+								nameArray[1] = frameNumber;
+
+							} else {
+
+								nameArray[1] = parseInt(nameArray[1]);
+							}
 
 							file = nameArray.join('.');
 
@@ -225,11 +271,10 @@ async.series([
 									pushCount++;
 								}
 
+								callback(err);
 								totalPushCount++;
 							});
 						}
-
-						callback();
 					});
 
 				} else {
