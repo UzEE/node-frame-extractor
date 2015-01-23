@@ -13,7 +13,7 @@ var fs = require('fs'),
 		.usage("\nExtracts adjecent frames from each scene in the given input video, and saves them in a new sub-directory called 'frames'.\n\nUsage: extract-frames -i [video] --fps [num] --frame-count [num] --data [scenes.json]")
 		.example('extract-frames -i ./1.mp4 --data ./scenes.json', "Dump adjecent frames of all scenes in the file asuming a default framerate of 23.976")
 		.example('extract-frames -i 1.mp4 -d scenes.json -f 29.97 -c 3 -p', "Dump six adjecent frames (three on either sides) of all scenes using a framerate of 29.97 and push them to the cloud storage.")
-		.demand(['i', 'd'])
+		.demand(['input'])
 		.alias('i', 'input')
 		.alias('d', 'data')
 		.alias('r', 'fps')
