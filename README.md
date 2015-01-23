@@ -59,7 +59,7 @@ Installation
 
 #### Prerequisites
 
-You should have ```[ffmpeg](https://www.ffmpeg.org/download.html)``` and ```[graphicsmagik](http://www.graphicsmagick.org/README.html#installation)``` installed on your machine, and they should be exposed in the environment ```PATH```.
+You should have [```ffmpeg```](https://www.ffmpeg.org/download.html) and [```graphicsmagik```](http://www.graphicsmagick.org/README.html#installation) installed on your machine, and they should be exposed in the environment ```PATH```.
 
 #### Via NPM
 
@@ -115,7 +115,6 @@ For example:
 	"videoId": 7,
 	"frames": [14, 53, 234, 539, 872, 1143, 2763, 3234]
 }
-
 ```
 
 _Note: You can also use the ```--video-id``` or ```-v``` switch to pass in the Video ID._
