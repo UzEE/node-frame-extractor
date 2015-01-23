@@ -6,7 +6,7 @@ var fs = require('fs'),
 	async = require("async"),
 	gm = require("gm"),
 	AWS = require("aws-sdk"),
-	pkg = require(path.join(__dirname, 'package.json')),
+	pkg = require(path.join(__dirname, '..', 'package.json')),
 	child_process = require('child_process'),
 	argv = require('yargs')
 		.version(pkg.name + ", version: " + pkg.version + "\n", "version")
