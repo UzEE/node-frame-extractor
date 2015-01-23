@@ -96,8 +96,7 @@ if (!fs.existsSync(outDir)) {
 	fs.mkdirSync(outDir);
 }
 
-var outDir = path.basename(outDir),
-	failedFrames = [], 
+var failedFrames = [], 
 	fileList = [], 
 	fileCount = 0,
 	pushCount = 0,
