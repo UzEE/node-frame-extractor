@@ -41,16 +41,16 @@ This command line utility supports the following parameters.
 
 | Switch | Default | Description |
 | ------ | ------- | ----------- |
-| **-i**, **--input** | _required_ | Input video filename. |
-| **-d**, **--data** | _required if not --extract-all-frames_ | Scene data in Json format with a scene object having startFrame and endFrame keys. |
-| **-r**, **--fps** | _23.976_ | Framerate of the input video. Must be accurate to extract scenes properly. |
-| **-c**, **--frame-count** | _5_ | Number of frames to extract on either side of the scene. This is in addition to the frame marked in the scene boundry. |
-| **-t**, **--concurrency** | _8_ | Number of concurrent sub-processes to use simultaneously. Should be used to tweak resource consumption. Use a value of 0 to run all sub-processes at once. |
-| **-b**, **--bucket** | _ingrain.scenes.frames_ | S3 Bucket to which the extracted frames will be pushed to. |
-| **-p**, **--push-to-cloud** | _false_ | Determines whether the extracted images be pushed to a cloud storage or not. |
-| **-a**, **--extract-all-frames** | _false_ | Extract all frames of the video. Requires ```--fps``` and ```--total-frames```. |
-| **-f**, **--total-frames** | _null_ | Total number of frames to extract from the video. |
-| **-v**, **--video-id** | _null_ | An identifier for the video being processed. It is used as an identifier in directory name. |
+| **--input**, **-i** | _required_ | Input video filename. |
+| **--data**, **-d** | _required if not -a_ | Scene data in Json format with a scene object having startFrame and endFrame keys. |
+| **--fps**, **-r** | _23.976_ | Framerate of the input video. Must be accurate to extract scenes properly. |
+| **--frame-count**, **-c** | _5_ | Number of frames to extract on either side of the scene. This is in addition to the frame marked in the scene boundry. |
+| **--concurrency**, **-t** | _8_ | Number of concurrent sub-processes to use simultaneously. Should be used to tweak resource consumption. Use a value of 0 to run all sub-processes at once. |
+| **--bucket**, **-b** | _ingrain.scenes.frames_ | S3 Bucket to which the extracted frames will be pushed to. |
+| **--push-to-cloud**, **-p** | _false_ | Determines whether the extracted images be pushed to a cloud storage or not. |
+| **--extract-all-frames**, **-a** | _false_ | Extract all frames of the video. Requires ```--fps``` and ```--total-frames```. |
+| **--total-frames**, **-f** | _null_ | Total number of frames to extract from the video. |
+| **--video-id**, **-v** | _null_ | An identifier for the video being processed. It is used as an identifier in directory name. |
 | **-aws-profile** | _default_ | Name of the AWS Credentials profile to use from the ~/.aws/credentials file. |
 | **-aws-region** | _us-west-2_ | Specify the AWS region to use. |
 
