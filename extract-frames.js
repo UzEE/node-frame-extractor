@@ -120,11 +120,11 @@ var getTimeString = function (input) {
 }
 
 var buildFileName = function (dir, frame, videoId) {
-	return dir + "." + videoId + "/frame.keyframe." + frame + ".%003d.jpg";
+	return dir + "/frame.keyframe." + frame + ".%003d.jpg";
 }
 
 if (extractAllFrames && totalFrames) {
-	ffmpegCmd = "ffmpeg -ss 00:00:00 -i " + argv.i + " -r " + fps + " -vframes " + totalFrames + " " + outDir + "." + videoId + "/frame.%0" + totalFrames.toString().length + "d.jpg";
+	ffmpegCmd = "ffmpeg -ss 00:00:00 -i " + argv.i + " -r " + fps + " -vframes " + totalFrames + " " + outDir + "/frame.%0" + totalFrames.toString().length + "d.jpg";
 }
 
 console.log("Starting the process...");
