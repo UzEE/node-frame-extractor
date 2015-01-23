@@ -55,23 +55,26 @@ if (!fs.existsSync(argv.i)) {
 	process.exit(1);
 }
 
-var data;
+var data = undefined;
 
-if (argv.data && !fs.existsSync(argv.data)) {
+if (argv.data) {
+
+	if (!fs.existsSync(argv.data)) {
 	
-	console.error("Error: Couldn't find the given scene data file: %s", argv.data);
-	process.exit(1);
+		console.error("Error: Couldn't find the given scene data file: %s", argv.data);
+		process.exit(1);
 
-} else {
+	} else {
 
-	try {
-		data = require(path.join(process.cwd(), argv.data));
-	}
+		try {
+			data = require(path.join(process.cwd(), argv.data));
+		}
 
-	catch (exp) {
-		
-		console.error("Error: Couldn't read the given scene data file: %s\nMake sure the file name is given in a format which can be parsed by CommonJS's require API.\nFor example: Use ./scenes.json instead of scenes.json.", argv.data);
-		process.exit(1);	
+		catch (exp) {
+			
+			console.error("Error: Couldn't read the given scene data file: %s\nMake sure the file name is given in a format which can be parsed by CommonJS's require API.\nFor example: Use ./scenes.json instead of scenes.json.", argv.data);
+			process.exit(1);	
+		}
 	}
 }
 
