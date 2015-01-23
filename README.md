@@ -88,7 +88,13 @@ cd ingrain-frame-ext
 npm install 
 ```
 
-**Step 3**: Link the local module to your global NPM cache.
+**Step 3**: Manually prepare the CLI utility.
+
+```
+grunt prepare
+```
+
+**Step 4**: Link the local module to your global NPM cache.
 
 ```
 npm link
