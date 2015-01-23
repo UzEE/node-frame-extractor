@@ -3,7 +3,7 @@ Node Frame Extractor
 
 This simeple command line utility extracts the specified frames (and their adjecent frames) from a video, resizes them and uploads them to a bucket in Amazon S3.
 
-### Usage
+#### Usage
 
 ```
 extract-frames --input [video] --data [data.json] --fps [framerate] --push-to-cloud
@@ -15,7 +15,7 @@ For a detailed list of available options and defaults, run the following:
 extract-frames --help
 ```
 
-### Example
+#### Example
 
 The following example dumps six adjecent frames (three on either sides) of all given frames using a framerate of 29.97 and push them to the cloud storage.
 
@@ -23,7 +23,7 @@ The following example dumps six adjecent frames (three on either sides) of all g
 extract-frames --input video.mp4 --data frames.json --fps 29.97 --frame-count 3 --push-to-cloud
 ```
 
-### Amazon S3 Credentials
+#### Amazon S3 Credentials
 
 This utility uses Amazon AWS credentials information stored in the current users ```~/.aws/credentials``` file. If you have more than one credentials configuration in the file, you can use the ```--aws-profile``` command line switch to specify which profile to use.
 
@@ -35,7 +35,7 @@ extract-frames --input myVideo.mp4 --data frames.json --aws-profile myprofilenam
 
 For more information on how to setup local credentials, refer to [Amazon's AWS documentation](http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-configuring.html).
 
-### Parameters
+#### Parameters
 
 This command line utility supports the following parameters.
 
@@ -127,7 +127,7 @@ If you want to dump all frames of the video instead, you only need to pass the f
 | ----- | ----- |
 | **-v**, **--video-id** | The numeric ID of the video being processed. It is used as a part of the name for the directory. A random number will be used if omitted. |
 
-### Uploaded Asset URIs
+#### Uploaded Asset URIs
 
 The uploaded assets can be accessed from the Amazon S3 bucket using the following URI format:
 
