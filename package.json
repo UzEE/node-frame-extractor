@@ -1,6 +1,6 @@
 {
-  "name": "ingrain-frame-ext",
-  "version": "0.1.1",
+  "name": "node-frame-extractor",
+  "version": "0.2.0",
   "description": "A simple tool to extract, resize and upload frames from the given video.",
   "main": "extract-frames.js",
   "preferGlobal": "true",
@@ -8,13 +8,12 @@
   "bin": {
     "extract-frames": "extract-frames.js"
   },
-  "scripts": {
-    "postinstall": "npm link",
-    "preuninstall": "npm unlink"
-  },
   "repository": {
     "type": "git",
-    "url": "ssh://git@54.68.168.242:~/ingrain-frame-ext.git"
+    "url": "https://github.com/UzEE/node-frame-extractor"
+  },
+  "bugs": {
+    "url": "https://github.com/UzEE/node-frame-extractor/issues"
   },
   "dependencies": {
     "async": "^0.9.0",
@@ -29,8 +28,11 @@
   "keywords": [
     "ingrain",
     "video",
-    "ffmpeg"
+    "ffmpeg",
+    "frames",
+    "aws",
+    "s3"
   ],
-  "author": "Uzair Sajid",
+  "author": "Uzair Sajid <uzee@uzeeinc.net>",
   "license": "MIT"
 }
