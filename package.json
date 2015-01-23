@@ -5,7 +5,7 @@
   "main": "extract-frames.js",
   "preferGlobal": "true",
   "bin": {
-    "extract-frames": "extract-frames.js"
+    "extract-frames": "./extract-frames.js"
   },
   "repository": {
     "type": "git",
