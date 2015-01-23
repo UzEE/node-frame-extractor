@@ -33,6 +33,7 @@ var fs = require('fs'),
 		.default('f', null)
 		.default('v', null)
 		.default('aws-profile', "default")
+		.default('aws-region', "us-west-2")
 		.describe('i', 'Input video filename.')
 		.describe('d', 'Scene data in Json format with a scene object having startFrame and endFrame keys.')
 		.describe('r', 'Framerate of the input video. Must be accurate to extract scenes properly.')
@@ -44,6 +45,7 @@ var fs = require('fs'),
 		.describe('f', 'Total number of frames to extract fromt he video.')
 		.describe('v', 'An identifier for the video being processed. It is used as an identifier in directory name.')
 		.describe('aws-profile', "Name of the AWS Credentials profile to use from the ~/.aws/credentials file.")
+		.describe('aws-region', "Specify the AWS region to use.")
 		.argv;
 
 if (!fs.existsSync(argv.i)) {
@@ -101,7 +103,7 @@ var credentials = new AWS.SharedIniFileCredentials({profile: argv.awsProfile});
 AWS.config.update({
 
 	credentials: credentials,
-	region: "us-west-2"
+	region: argv.awsRegion
 });
 
 var s3 = new AWS.S3();
