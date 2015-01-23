@@ -42,7 +42,7 @@ var fs = require('fs'),
 		.describe('b', 'S3 Bucket to which the extracted frames will be pushed to.')
 		.describe('p', 'Determines whether the extracted images be pushed to a cloud storage or not.')
 		.describe('a', 'Extract all frames of the video. Requires --fps and --total-frames.')
-		.describe('f', 'Total number of frames to extract fromt he video.')
+		.describe('f', 'Total number of frames to extract from the video.')
 		.describe('v', 'An identifier for the video being processed. It is used as an identifier in directory name.')
 		.describe('aws-profile', "Name of the AWS Credentials profile to use from the ~/.aws/credentials file.")
 		.describe('aws-region', "Specify the AWS region to use.")
