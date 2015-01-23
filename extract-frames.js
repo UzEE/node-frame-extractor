@@ -90,7 +90,7 @@ var fps = Math.abs(argv.fps),
 var inputExt = path.extname(argv.i),
 	inputName = path.basename(argv.i, inputExt);
 
-var outDir = path.join(path.dirname(path.resolve(argv.i)), "frames");
+var outDir = path.join(path.dirname(path.resolve(argv.i)), "frames." + videoId);
 
 if (!fs.existsSync(outDir)) {
 	fs.mkdirSync(outDir);
