@@ -23,6 +23,7 @@ var fs = require('fs'),
 		.alias('p', 'push-to-cloud')
 		.alias('a', 'extract-all-frames')
 		.alias('f', 'total-frames')
+		.alias('v', 'video-id')
 		.default('r', 23.976)
 		.default('c', 5)
 		.default('t', 8)
@@ -30,6 +31,7 @@ var fs = require('fs'),
 		.default('p', false)
 		.default('a', false)
 		.default('f', null)
+		.default('v', null)
 		.default('aws-profile', "default")
 		.describe('i', 'Input video filename.')
 		.describe('d', 'Scene data in Json format with a scene object having startFrame and endFrame keys.')
@@ -40,6 +42,7 @@ var fs = require('fs'),
 		.describe('p', 'Determines whether the extracted images be pushed to a cloud storage or not.')
 		.describe('a', 'Extract all frames of the video. Requires --fps and --total-frames.')
 		.describe('f', 'Total number of frames to extract fromt he video.')
+		.describe('v', 'An identifier for the video being processed. It is used as an identifier in directory name.')
 		.describe('aws-profile', "Name of the AWS Credentials profile to use from the ~/.aws/credentials file.")
 		.argv;
 
@@ -73,7 +76,8 @@ var fps = Math.abs(argv.fps),
 	pushToCloud = argv.pushToCloud,
 	concurrency = argv.concurrency,
 	totalFrames = argv.totalFrames,
-	extractAllFrames = argv.extractAllFrames;
+	extractAllFrames = argv.extractAllFrames,
+	videoId = argv.videoId || data.videoId || Math.round(Math.random() * 100000);
 
 var inputExt = path.extname(argv.i),
 	inputName = path.basename(argv.i, inputExt);
@@ -90,7 +94,6 @@ var outDir = path.basename(outDir),
 	fileCount = 0,
 	pushCount = 0,
 	totalPushCount = 0,
-	videoId = data.videoId,
 	ffmpegCmd = null;
 
 var credentials = new AWS.SharedIniFileCredentials({profile: argv.awsProfile});
