@@ -119,8 +119,8 @@ var getTimeString = function (input) {
 	return result.getUTCHours() + ":" + result.getUTCMinutes() + ":" + result.getUTCSeconds() + "." + result.getUTCMilliseconds(); 
 }
 
-var buildFileName = function (dir, frame) {
-	return dir + "/frame.keyframe." + frame + ".%003d.jpg";
+var buildFileName = function (dir, frame, videoId) {
+	return dir + "." + videoId + "/frame.keyframe." + frame + ".%003d.jpg";
 }
 
 if (extractAllFrames && totalFrames) {
@@ -143,7 +143,7 @@ async.series([
 				function (frame, callback) {
 
 					var time = (frame - frameCount) / fps;
-					var outName = buildFileName(outDir, frame);
+					var outName = buildFileName(outDir, frame, videoId);
 
 					ffmpegCmd = "ffmpeg -ss " + getTimeString(time) + " -i " + argv.i + " -frames:v " + (frameCount * 2 + 1) + " " + outName;
 
