@@ -29,6 +29,7 @@
   },
   "scripts": {
     "prepublish": "grunt prepare",
+    "postpublish": "rm -r bin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
