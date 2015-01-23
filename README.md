@@ -71,6 +71,8 @@ https://s3-us-west-2.amazonaws.com/ingrain.scenes.frames/video.1/frame.4104.jpg
 
 Since this module isn't published in the gloabl NPM registry, you need to clone the project repository and build the utility yourself.
 
+_Note: Make sure GraphicsMagik is installed on the server._
+
 **Step 1**: Clone the repository.
 
 ```

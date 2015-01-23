@@ -87,7 +87,7 @@ if (!fs.existsSync(outDir)) {
 var outDir = path.basename(outDir),
 	failedFrames = [], 
 	fileList = [], 
-	fileCount = 0
+	fileCount = 0,
 	pushCount = 0,
 	totalPushCount = 0,
 	videoId = data.videoId,
