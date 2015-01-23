@@ -24,6 +24,7 @@ var fs = require('fs'),
 		.alias('a', 'extract-all-frames')
 		.alias('f', 'total-frames')
 		.alias('v', 'video-id')
+		.default('d', null)
 		.default('r', 23.976)
 		.default('c', 5)
 		.default('t', 8)
@@ -54,7 +55,7 @@ if (!fs.existsSync(argv.i)) {
 	process.exit(1);
 }
 
-if (!fs.existsSync(argv.data)) {
+if (argv.data && !fs.existsSync(argv.data)) {
 	
 	console.error("Error: Couldn't find the given scene data file: %s", argv.data);
 	process.exit(1);
