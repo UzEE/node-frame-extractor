@@ -1,10 +1,9 @@
 {
   "name": "node-frame-extractor",
-  "version": "0.2.0",
+  "version": "0.2.0-beta2",
   "description": "A simple tool to extract, resize and upload frames from the given video.",
   "main": "extract-frames.js",
   "preferGlobal": "true",
-  "readme": "README.md",
   "bin": {
     "extract-frames": "extract-frames.js"
   },
@@ -14,6 +13,9 @@
   },
   "bugs": {
     "url": "https://github.com/UzEE/node-frame-extractor/issues"
+  },
+  "engine": {
+    "node": ">=0.10.35"
   },
   "dependencies": {
     "async": "^0.9.0",
