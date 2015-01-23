@@ -1,4 +1,4 @@
-Ingrain Frame Extractor
+Node Frame Extractor
 =======================
 
 This simeple command line utility extracts the specified frames (and their adjecent frames) from a video, resizes them and uploads them to a bucket in Amazon S3.
@@ -37,21 +37,34 @@ For more information on how to setup local credentials, refer to [Amazon's AWS d
 
 ### Input Data Format
 
+#### Extract Specific Frames
+
 This utility expects the input ```--data``` to have certain specific keys:
 
-* **videoId**: The numeric ID of the video being processed. It is used as a part of the name of the 
-* **frames**: An array of all the frames to process. 
+| field | value |
+| ----- | ----- |
+| **videoId** | The numeric ID of the video being processed. It is used as a part of the name of the AWS container. |
+| **frames** | An array of all the frames to process. |
 
 For example:
 
 ```json
-
 {
 	"videoId": 7,
 	"frames": [14, 53, 234, 539, 872, 1143, 2763, 3234]
 }
 
 ```
+
+_Note: You can also use the ```--video-id``` or ```-v``` switch to pass in the Video ID._
+
+#### Extract All Frames
+
+If you want to dump all frames of the video instead, you only need to pass the following parameters instead of the ```--data``` option:
+
+| field | value |
+| ----- | ----- |
+| **-v**, **--video-id** | The numeric ID of the video being processed. It is used as a part of the name for the directory. A random number will be used if omitted. |
 
 ### Uploaded Asset URIs
 
