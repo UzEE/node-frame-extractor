@@ -51,9 +51,50 @@ This command line utility supports the following parameters.
 | **--extract-all-frames**, **-a** | _false_ | Extract all frames of the video. Requires ```--fps``` and ```--total-frames```. |
 | **--total-frames**, **-f** | _null_ | Total number of frames to extract from the video. |
 | **--video-id**, **-v** | _null_ | An identifier for the video being processed. It is used as an identifier in directory name. |
-| **-aws-profile** | _default_ | Name of the AWS Credentials profile to use from the ~/.aws/credentials file. |
-| **-aws-region** | _us-west-2_ | Specify the AWS region to use. |
+| **--aws-profile** | _default_ | Name of the AWS Credentials profile to use from the ~/.aws/credentials file. |
+| **--aws-region** | _us-west-2_ | Specify the AWS region to use. |
 
+Installation
+------------
+
+#### Prerequisites
+
+You should have [```ffmpeg```](https://www.ffmpeg.org/download.html) and [```graphicsmagik```](http://www.graphicsmagick.org/README.html#installation) installed on your machine, and they should be exposed in the environment ```PATH```.
+
+#### Via NPM
+
+The simplest way to install ```node-frame-extractor``` is via NPM. All you need to do is:
+
+```
+npm install -g node-frame-extractor
+```
+
+After that you can use the ```extract-frames``` command anywhere in your system.
+
+#### Via Git Repository
+
+If you rather install from source, you can clone the repository and set it up manually.
+
+**Step 1**: Clone the repository.
+
+```
+git clone https://github.com/UzEE/node-frame-extractor.git
+```
+
+**Step 2**: Install the project dependencies.
+
+```
+cd ingrain-frame-ext
+npm install 
+```
+
+**Step 3**: Link the local module to your global NPM cache.
+
+```
+npm link
+```
+
+You should now be able to use ```extract-frames``` command from anywhere in your system.
 
 Input Data Format
 -----------------
@@ -74,7 +115,6 @@ For example:
 	"videoId": 7,
 	"frames": [14, 53, 234, 539, 872, 1143, 2763, 3234]
 }
-
 ```
 
 _Note: You can also use the ```--video-id``` or ```-v``` switch to pass in the Video ID._
@@ -100,31 +140,3 @@ For example, the URI for frame 4104 of video Id 1 in the ```ingrain.scenes.frame
 https://s3-us-west-2.amazonaws.com/ingrain.scenes.frames/video.1/frame.4104.jpg
 
 ![Video Frame](https://s3-us-west-2.amazonaws.com/ingrain.scenes.frames/video.1/frame.4104.jpg)
-
-Installation
-------------
-
-Since this module isn't published in the gloabl NPM registry, you need to clone the project repository and build the utility yourself.
-
-_Note: Make sure GraphicsMagik is installed on the server._
-
-**Step 1**: Clone the repository.
-
-```
-git clone git@54.68.168.242:~/ingrain-frame-ext.git
-```
-
-**Step 2**: Install the project dependencies.
-
-```
-cd ingrain-frame-ext
-npm install
-```
-
-**Step 3**: Link the local module to your global NPM cache.
-
-```
-npm link
-```
-
-You should now be able to use ```extract-frames``` command from anywhere in your system.
