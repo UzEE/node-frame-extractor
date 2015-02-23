@@ -1,12 +1,27 @@
 #!/usr/bin/env node
 
+var path = require('path'),
+	pkg;
+
+if (require.main === module) {
+
+	try {
+		pkg = require(path.join(__dirname, '..', 'package.json'));
+	}
+
+	catch (e) {
+		pkg = require(path.join(__dirname, 'package.json'));
+	}
+
+} else {
+	pkg = require(path.join(__dirname, 'package.json'));
+}
+
 var fs = require('fs'),
-	path = require('path'),
 	util = require('util'),
 	async = require("async"),
 	gm = require("gm"),
 	AWS = require("aws-sdk"),
-	pkg = require(path.join(__dirname, '..', 'package.json')),
 	child_process = require('child_process'),
 	argv = require('yargs')
 		.version(pkg.name + ", version: " + pkg.version + "\n", "version")
@@ -85,7 +100,7 @@ var fps = Math.abs(argv.fps),
 	concurrency = argv.concurrency,
 	totalFrames = argv.totalFrames,
 	extractAllFrames = argv.extractAllFrames,
-	videoId = argv.videoId || data.videoId || Math.round(Math.random() * 100000);
+	videoId = argv.videoId || (data && data.videoId) || Math.round(Math.random() * 100000);
 
 var inputExt = path.extname(argv.i),
 	inputName = path.basename(argv.i, inputExt);
@@ -132,7 +147,7 @@ console.log("Starting the process...");
 async.series([
 
 	// Extract the frames
-	function (cb) {
+	function extractFramesFromVideo(cb) {
 
 		if (!extractAllFrames) {
 
@@ -164,7 +179,7 @@ async.series([
 
 				function (err) {
 
-					console.info("All scenes have been dumped in the ./frames/ directory.");
+					console.info("All scenes have been dumped in the %s directory.", outDir);
 					cb(err, true);
 				}
 			);
@@ -183,7 +198,7 @@ async.series([
 
 					} else {
 
-						console.info("All scenes have been dumped in the ./frames/ directory.");
+						console.info("All scenes have been dumped in the %s directory.", outDir);
 						cb(null, true);
 					}
 				}
@@ -192,7 +207,7 @@ async.series([
 	},
 
 	// Build a list of all files to process
-	function (cb) {
+	function listFilesToProcess(cb) {
 
 		fs.readdir(outDir, function (err, files) {
 
@@ -211,7 +226,7 @@ async.series([
 	},
 
 	// Process all the images with node-gm
-	function (cb) {
+	function processImages(cb) {
 
 		console.log("Total images extracted: %d", fileList.length);
 		console.log("Getting ready to process and resize %d images...", fileList.length);
@@ -306,7 +321,7 @@ async.series([
 
 				if (!err) {
 
-					console.log("Resized all the images in ./frames/ directory.");
+					console.log("Resized all the images in %s directory.", outDir);
 				}
 
 				cb(err);
@@ -315,7 +330,7 @@ async.series([
 	},
 
 	// Push images to AWS S3
-	function (cb) {
+	function pushToS3(cb) {
 
 		if (pushToCloud) {
 
@@ -335,11 +350,14 @@ async.series([
 					cb(err);
 				}
 			);
+
+		} else {
+			cb();
 		}
 	},
 
 	// Delete the local images
-	function (cb) {
+	function deleteLocalImages(cb) {
 
 		if (pushToCloud) {
 
@@ -365,11 +383,24 @@ async.series([
 
 				function(err) {
 
-					console.log("Deleted all the temporary files in the ./frames/ directory");
+					console.log("Deleted all the temporary files in the %s directory", outDir);
 
 					cb();
 				}
 			);
 		}
+	},
+
+	// Delete the temporary directory
+	function deleteTemporaryDirectory(cb) {
+
+		if (pushToCloud && fs.existsSync(outDir)) {
+
+			fs.rmdirSync(outDir);
+
+			console.log("Removed the temporary %s directory", outDir);
+		}
+
+		cb();
 	}
 ]);
