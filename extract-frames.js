@@ -50,6 +50,7 @@ var fs = require('fs'),
 		.default('v', null)
 		.default('aws-profile', "default")
 		.default('aws-region', "us-west-2")
+		.default('verbose', false)
 		.describe('i', 'Input video filename.')
 		.describe('d', 'Scene data in Json format with a scene object having startFrame and endFrame keys.')
 		.describe('r', 'Framerate of the input video. Must be accurate to extract scenes properly.')
@@ -62,6 +63,7 @@ var fs = require('fs'),
 		.describe('v', 'An identifier for the video being processed. It is used as an identifier in directory name.')
 		.describe('aws-profile', "Name of the AWS Credentials profile to use from the ~/.aws/credentials file.")
 		.describe('aws-region', "Specify the AWS region to use.")
+		.describe('verbose', "Prints detailed logs instead of simply showing progress in stdout.")
 		.argv;
 
 if (!fs.existsSync(argv.i)) {
@@ -100,7 +102,8 @@ var fps = Math.abs(argv.fps),
 	concurrency = argv.concurrency,
 	totalFrames = argv.totalFrames,
 	extractAllFrames = argv.extractAllFrames,
-	videoId = argv.videoId || (data && data.videoId) || Math.round(Math.random() * 100000);
+	videoId = argv.videoId || (data && data.videoId) || Math.round(Math.random() * 100000),
+	verbose = argv.verbose;
 
 var inputExt = path.extname(argv.i),
 	inputName = path.basename(argv.i, inputExt);
@@ -126,6 +129,18 @@ AWS.config.update({
 	region: argv.awsRegion
 });
 
+var progressWeights = {
+
+	extract: 20,
+	listFiles: 3,
+	process: 50,
+	push: 15,
+	deleteImages: 10,
+	deleteDir: 2
+};
+
+var totalProgress = 0;
+
 var s3 = new AWS.S3();
 
 var getTimeString = function (input) {
@@ -138,11 +153,77 @@ var buildFileName = function (dir, frame, videoId) {
 	return dir + "/frame.keyframe." + frame + ".%003d.jpg";
 }
 
+var printLog = function () {
+
+	if (verbose) {
+		console.log.apply(this, arguments);
+	}
+}
+
+var addPrevWeight = function (value, step) {
+
+	value = parseFloat(value);
+
+	switch (step) {
+
+		case "deleteDir":
+			
+			value += progressWeights.deleteImages + progressWeights.process + progressWeights.listFiles + progressWeights.extract;
+			break;
+
+		case "deleteImages":
+			
+			value += progressWeights.push + progressWeights.process + progressWeights.listFiles + progressWeights.extract;
+			break;
+
+		case "push":
+			
+			value += progressWeights.process + progressWeights.listFiles + progressWeights.extract;
+			break;
+
+		case "process":
+			
+			value += progressWeights.listFiles + progressWeights.extract;
+			break;
+
+		case "listFiles":
+			
+			value += progressWeights.extract;
+			break;
+
+		case "extract":
+			
+			value += 0;
+			break;
+	}
+
+	return value;
+}
+
+var printProgress = function (value, step) {
+
+	//var progressStr = verbose ? "\n" : "";
+	var progressStr = "";
+	var adjustedWeight = 1;
+
+	if (!pushToCloud) {
+		adjustedWeight = 100 / (100 - (progressWeights.push + progressWeights.deleteImages + progressWeights.deleteDir));	
+	}
+
+	value = addPrevWeight(value * progressWeights[step], step);
+
+	totalProgress = value * adjustedWeight;
+
+	progressStr += "Progress: " + totalProgress.toFixed(2) + "%\r";
+
+	process.stdout.write(progressStr);
+}
+
 if (extractAllFrames && totalFrames) {
 	ffmpegCmd = "ffmpeg -ss 00:00:00 -i " + argv.i + " -r " + fps + " -vframes " + totalFrames + " " + outDir + "/frame.%0" + totalFrames.toString().length + "d.jpg";
 }
 
-console.log("Starting the process...");
+printLog("Starting the process...");
 
 async.series([
 
@@ -168,10 +249,10 @@ async.series([
 						function (err) {
 
 							if (err) { 
-								console.log(err); 
+								console.error(err); 
 							}
 
-							fileCount++;
+							printProgress(++fileCount / data.frames, "extract");
 							callback(err);
 						}
 					);
@@ -179,7 +260,7 @@ async.series([
 
 				function (err) {
 
-					console.info("All scenes have been dumped in the %s directory.", outDir);
+					printLog("All scenes have been dumped in the %s directory.", outDir);
 					cb(err, true);
 				}
 			);
@@ -193,12 +274,14 @@ async.series([
 
 					if (err) { 
 
-						console.log(err); 
+						console.error(err); 
 						cb(err, false);
 
 					} else {
 
-						console.info("All scenes have been dumped in the %s directory.", outDir);
+						printLog("All scenes have been dumped in the %s directory.", outDir);
+
+						printProgress(1, "extract");
 						cb(null, true);
 					}
 				}
@@ -214,11 +297,12 @@ async.series([
 			if (err) {
 
 				console.error("Something went wrong.");
-				console.log(err);
+				console.error(err);
 			
 			} else {
 
 				fileList = files;
+				printProgress(1, "listFiles");
 			}
 
 			cb(err);
@@ -228,8 +312,10 @@ async.series([
 	// Process all the images with node-gm
 	function processImages(cb) {
 
-		console.log("Total images extracted: %d", fileList.length);
-		console.log("Getting ready to process and resize %d images...", fileList.length);
+		printLog("Total images extracted: %d", fileList.length);
+		printLog("Getting ready to process and resize %d images...", fileList.length);
+
+		var processedCount = 0;
 
 		async.eachLimit(
 
@@ -250,8 +336,11 @@ async.series([
 						if (err) {
 
 							console.error("Something went wrong while processing the image.");
-							console.log(err);
+							console.error(err);
+							return;
 						}
+
+						printProgress(++processedCount / fileList.length, "process");
 
 						if (pushToCloud) {
 
@@ -289,11 +378,11 @@ async.series([
 								if (err) {
 
 									console.error("Something went wrong while trying to upload '%s' to cloud storage.", file);
-									console.log(err);
+									console.error(err);
 								
 								} else {
 
-									pushCount++;
+									printProgress(++pushCount / fileList.length, "push");
 								}
 
 								callback(err);
@@ -309,8 +398,10 @@ async.series([
 						if (err) {
 
 							console.error("Something went wrong while processing the image.");
-							console.log(err);
+							console.error(err);
 						}
+
+						printProgress(++processedCount / fileList.length, "process");
 
 						callback();
 					});
@@ -321,7 +412,9 @@ async.series([
 
 				if (!err) {
 
-					console.log("Resized all the images in %s directory.", outDir);
+					printLog("Resized all the images in %s directory.", outDir);
+					printProgress(1, "process");
+
 				}
 
 				cb(err);
@@ -342,11 +435,13 @@ async.series([
 
 				function (callback) {
 
-					console.log("Pushed %d / %d files to cloud storage.", pushCount, fileList.length);
+					printLog("Pushed %d / %d files to cloud storage.", pushCount, fileList.length);
 					setTimeout(callback, 1000);
 				},
 
 				function (err) {
+
+					printProgress(1, "push");
 					cb(err);
 				}
 			);
@@ -361,6 +456,8 @@ async.series([
 
 		if (pushToCloud) {
 
+			var deleteCount = 0;
+
 			async.eachLimit(
 
 				fileList,
@@ -374,16 +471,20 @@ async.series([
 						if (err) {
 
 							console.error("Couldn't delete the file: %s", fullPath);
-							console.log(err);
+							console.error(err);
+							return;
 						}
 
+						printProgress(++deleteCount / fileList.length, "deleteImages");
 						callback();
 					});
 				},
 
 				function(err) {
 
-					console.log("Deleted all the temporary files in the %s directory", outDir);
+					printLog("Deleted all the temporary files in the %s directory", outDir);
+
+					printProgress(1, "deleteImages");
 
 					cb();
 				}
@@ -398,7 +499,9 @@ async.series([
 
 			fs.rmdirSync(outDir);
 
-			console.log("Removed the temporary %s directory", outDir);
+			printLog("Removed the temporary %s directory", outDir);
+
+			printProgress(1, "deleteDir");
 		}
 
 		cb();
