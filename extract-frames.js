@@ -133,9 +133,10 @@ var progressWeights = {
 
 	extract: 20,
 	listFiles: 3,
-	process: 50,
+	process: 55,
 	push: 15,
-	deleteImages: 10,
+	processAndPush: 70,
+	deleteImages: 5,
 	deleteDir: 2
 };
 
@@ -174,6 +175,11 @@ var addPrevWeight = function (value, step) {
 		case "deleteImages":
 			
 			value += progressWeights.push + progressWeights.process + progressWeights.listFiles + progressWeights.extract;
+			break;
+
+		case "processAndPush":
+			
+			value += progressWeights.listFiles + progressWeights.extract;
 			break;
 
 		case "push":
@@ -340,7 +346,7 @@ async.series([
 							return;
 						}
 
-						printProgress(++processedCount / fileList.length, "process");
+						printProgress(++processedCount / (fileList.length * 2), "processAndPush");
 
 						if (pushToCloud) {
 
@@ -382,7 +388,8 @@ async.series([
 								
 								} else {
 
-									printProgress(++pushCount / fileList.length, "push");
+									pushCount++;
+									printProgress(++processedCount / (fileList.length * 2), "processAndPush");
 								}
 
 								callback(err);
@@ -401,7 +408,7 @@ async.series([
 							console.error(err);
 						}
 
-						printProgress(++processedCount / fileList.length, "process");
+						printProgress(++processedCount / (fileList.length * 2), "process");
 
 						callback();
 					});
