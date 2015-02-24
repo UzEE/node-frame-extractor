@@ -229,7 +229,7 @@ if (extractAllFrames && totalFrames) {
 	ffmpegCmd = "ffmpeg -ss 00:00:00 -i " + argv.i + " -r " + fps + " -vframes " + totalFrames + " " + outDir + "/frame.%0" + totalFrames.toString().length + "d.jpg";
 }
 
-printLog("Starting the process...");
+console.info("Starting the frame dump process in temporary directory: %s", outDir);
 
 async.series([
 
@@ -408,7 +408,7 @@ async.series([
 							console.error(err);
 						}
 
-						printProgress(++processedCount / (fileList.length * 2), "process");
+						printProgress(++processedCount / fileList.length, "process");
 
 						callback();
 					});
@@ -448,7 +448,7 @@ async.series([
 
 				function (err) {
 
-					printProgress(1, "push");
+					printProgress(1, "processAndPush");
 					cb(err);
 				}
 			);
@@ -510,6 +510,8 @@ async.series([
 
 			printProgress(1, "deleteDir");
 		}
+
+		console.log("Finished the frame dump process.");
 
 		cb();
 	}
