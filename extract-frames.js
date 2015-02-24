@@ -220,7 +220,7 @@ var printProgress = function (value, step) {
 
 	totalProgress = value * adjustedWeight;
 
-	progressStr += "Progress: " + totalProgress.toFixed(2) + "%\r";
+	progressStr += "\033[0GProgress: " + totalProgress.toFixed(2) + "%";
 
 	process.stdout.write(progressStr);
 }
@@ -230,6 +230,7 @@ if (extractAllFrames && totalFrames) {
 }
 
 console.info("Starting the frame dump process in temporary directory: %s", outDir);
+console.info("");
 
 async.series([
 
@@ -272,6 +273,8 @@ async.series([
 			);
 
 		} else {
+
+			printProgress(0.15, "extract");
 
 			child_process.exec(
 
@@ -496,6 +499,9 @@ async.series([
 					cb();
 				}
 			);
+
+		} else {
+			cb();
 		}
 	},
 
@@ -511,6 +517,7 @@ async.series([
 			printProgress(1, "deleteDir");
 		}
 
+		console.log("\n");
 		console.log("Finished the frame dump process.");
 
 		cb();
