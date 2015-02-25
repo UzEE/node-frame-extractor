@@ -31,4 +31,5 @@ node_modules
 frames
 bin
 playground
+test.js
 *.mp4

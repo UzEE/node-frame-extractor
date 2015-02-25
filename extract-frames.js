@@ -39,6 +39,7 @@ var fs = require('fs'),
 		.alias('a', 'extract-all-frames')
 		.alias('f', 'total-frames')
 		.alias('v', 'video-id')
+		.alias('o', 'out-directory-prefix')
 		.default('d', null)
 		.default('r', 23.976)
 		.default('c', 5)
@@ -48,6 +49,7 @@ var fs = require('fs'),
 		.default('a', false)
 		.default('f', null)
 		.default('v', null)
+		.default('o', 'frames')
 		.default('aws-profile', "default")
 		.default('aws-region', "us-west-2")
 		.default('verbose', false)
@@ -61,6 +63,7 @@ var fs = require('fs'),
 		.describe('a', 'Extract all frames of the video. Requires --fps and --total-frames.')
 		.describe('f', 'Total number of frames to extract from the video.')
 		.describe('v', 'An identifier for the video being processed. It is used as an identifier in directory name.')
+		.describe('o', 'Directory where the frames should be dumped. This directory will be deleted after uploading the frames if --push-to-cloud is used.')
 		.describe('aws-profile', "Name of the AWS Credentials profile to use from the ~/.aws/credentials file.")
 		.describe('aws-region', "Specify the AWS region to use.")
 		.describe('verbose', "Prints detailed logs instead of simply showing progress in stdout.")
@@ -103,12 +106,13 @@ var fps = Math.abs(argv.fps),
 	totalFrames = argv.totalFrames,
 	extractAllFrames = argv.extractAllFrames,
 	videoId = argv.videoId || (data && data.videoId) || Math.round(Math.random() * 100000),
-	verbose = argv.verbose;
+	verbose = argv.verbose,
+	outDirPrexix = argv.outDirectoryPrefix;
 
 var inputExt = path.extname(argv.i),
 	inputName = path.basename(argv.i, inputExt);
 
-var outDir = path.join(path.dirname(path.resolve(argv.i)), "frames." + videoId);
+var outDir = path.join(path.dirname(path.resolve(argv.i)), outDirPrexix + "." + videoId);
 
 if (!fs.existsSync(outDir)) {
 	fs.mkdirSync(outDir);
