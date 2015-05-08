@@ -1,6 +1,6 @@
 {
   "name": "node-frame-extractor",
-  "version": "0.2.16",
+  "version": "1.0.0-alpha",
   "description": "A simple tool to extract, resize and upload frames from the given video.",
   "main": "./lib/extract-frames.js",
   "preferGlobal": "true",
