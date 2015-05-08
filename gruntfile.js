@@ -9,7 +9,7 @@ module.exports = function(grunt) {
 					eol: 'lf'
 				},
 				files: {
-					"./bin/extract-frames.js": ["./extract-frames.js"]
+					"./bin/extract-frames.js": ["./bin/extract-frames.js"]
 				}
 			}
 		}
