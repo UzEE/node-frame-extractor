@@ -59,7 +59,7 @@ Installation
 
 #### Prerequisites
 
-You should have [```ffmpeg```](https://www.ffmpeg.org/download.html) and [```graphicsmagik```](http://www.graphicsmagick.org/README.html#installation) installed on your machine, and they should be exposed in the environment ```PATH```.
+You should have [```ffmpeg```](https://www.ffmpeg.org/download.html) and [```graphicsmagick```](http://www.graphicsmagick.org/README.html#installation) installed on your machine, and they should be exposed in the environment ```PATH```.
 
 #### Via NPM
 
